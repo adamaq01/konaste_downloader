@@ -80,7 +80,7 @@ impl KDownloader {
     async fn run_inner(&self, client: Client) -> Result<(), Error> {
         let response = client.get(&self.url).send().await?.error_for_status()?;
 
-        let resource_info: ResourceInfo = {
+        let resource_info = {
             let body = response.bytes().await?;
             let xml = match kbinxml::from_binary(body.clone()) {
                 Ok((nodes, _)) => {
@@ -89,8 +89,13 @@ impl KDownloader {
                 Err(_) => body.into(),
             };
 
-            quick_xml::de::from_reader(xml.as_slice())
-                .map_err(|err| Error::ParseResourceInfo(err))?
+            let mut resource_info: ResourceInfo = quick_xml::de::from_reader(xml.as_slice())
+                .map_err(|err| Error::ParseResourceInfo(err))?;
+            // Remove entries with empty URLs
+            resource_info
+                .files
+                .retain(|file| !file.url.is_empty());
+            resource_info
         };
 
         let total = resource_info.files.len();
