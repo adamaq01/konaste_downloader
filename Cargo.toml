@@ -4,11 +4,13 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-anyhow = "1"
 tokio = { version = "1", features = ["full"] }
-reqwest = "0.12"
-serde = { version = "1.0", features = ["derive"] }
+reqwest = "0.13"
+serde = { version = "1", features = ["derive"] }
 quick-xml = { version = "0.38", features = ["serialize"] }
 clap = { version = "4", features = ["derive"] }
-kbinxml = { git = "https://github.com/mbilker/kbinxml-rs.git", version = "3.1.1" }
-sha2 = "0.10.9"
+kbinxml = { git = "https://github.com/mbilker/kbinxml-rs.git", rev = "706820b13aad2da90db4eedc8fb4eddd2fb0646e" }
+sha2 = "0.10"
+bon = "3"
+thiserror = "2"
+tokio-util = "0.7"
