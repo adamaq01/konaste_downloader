@@ -7,7 +7,7 @@ edition = "2024"
 tokio = { version = "1", features = ["full"] }
 reqwest = "0.13"
 serde = { version = "1", features = ["derive"] }
-quick-xml = { version = "0.38", features = ["serialize"] }
+quick-xml = { version = "0.39", features = ["serialize"] }
 clap = { version = "4", features = ["derive"] }
 kbinxml = { git = "https://github.com/mbilker/kbinxml-rs.git", rev = "706820b13aad2da90db4eedc8fb4eddd2fb0646e" }
 sha2 = "0.10"
