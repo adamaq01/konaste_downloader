@@ -80,13 +80,13 @@ impl KDownloader {
     async fn run_inner(&self, client: Client) -> Result<(), Error> {
         let response = client.get(&self.url).send().await?.error_for_status()?;
 
-        let resource_info = {
+        let (resource_info, ri_bin) = {
             let body = response.bytes().await?;
-            let xml = match kbinxml::from_binary(body.clone()) {
+            let (xml, ri_bin): (_, Option<Vec<_>>) = match kbinxml::from_binary(body.clone()) {
                 Ok((nodes, _)) => {
-                    kbinxml::to_text_xml(&nodes).map_err(|err| Error::ConvertResourceInfo(err))?
+                    (kbinxml::to_text_xml(&nodes).map_err(|err| Error::ConvertResourceInfo(err))?, Some(body.into()))
                 }
-                Err(_) => body.into(),
+                Err(_) => (body.into(), None),
             };
 
             let mut resource_info: ResourceInfo = quick_xml::de::from_reader(xml.as_slice())
@@ -95,7 +95,7 @@ impl KDownloader {
             resource_info
                 .files
                 .retain(|file| !file.url.is_empty());
-            resource_info
+            (resource_info, ri_bin)
         };
 
         let total = resource_info.files.len();
@@ -155,6 +155,11 @@ impl KDownloader {
             handle
                 .await
                 .map_err(|err| Error::InternalError(err.to_string()))??;
+        }
+
+        if let Some(ri_bin) = ri_bin {
+            let output_path = self.output.join("ri.bin");
+            tokio::fs::write(&output_path, &ri_bin).await?;
         }
 
         Ok(())
